@@ -1,0 +1,43 @@
+version: '3.3'
+
+services:
+  postgres:
+    image: mirror-hub.docker.tech.lastmile.com/library/postgres:9.6
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+
+  activemq:
+    image: mirror-internal.docker.home.work/gmwms/internalbroker:018d62f3
+    ports:
+      - "61616:61616"
+      - "8161:8161"
+
+  auto-store-event-listener-service:
+    environment:
+      - CFC_ID=7
+    image: mirror-internal.docker.home.work/gmwms/autostoreeventlistenerservice:latest
+    env_file: conf/auto-store-event-listener-service.properties
+    depends_on:
+      - activemq
+    ports:
+      - "6001:8080"
+
+  auto-store-communication-service:
+    image: mirror-internal.docker.home.work/gmwms/autostorecommunicationservice:latest
+    env_file: conf/auto-store-communication-service.properties
+    ports:
+      - "6002:9001"
+
+  autostore-simulator:
+    environment:
+      - CFC_ID=7
+    image: mirror-internal.docker.home.work/gmwmsutils/autostore-emulator:latest
+    env_file: conf/auto-store-simulator.properties
+    depends_on:
+      - activemq
+      - postgres
+    ports:
+      - "6003:8082"
+      - "6004:53005"

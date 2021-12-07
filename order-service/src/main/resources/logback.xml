@@ -1,0 +1,69 @@
+<configuration>
+    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <encoder>
+            <pattern>%date{YYYY-MM-dd HH:mm:ss.SSS} [%level] %logger{36} [%thread] [%mdc{X-B3-TraceId:--}] %message%n%xException</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>/tmp/logs/onboardingservice.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>/tmp/logs/onboardingservice.log.%d{yyyy-MM-dd_HH}.gz</fileNamePattern>
+            <maxHistory>48</maxHistory> <!-- 2 days-->
+        </rollingPolicy>
+        <encoder>
+            <pattern>%date{YYYY-MM-dd HH:mm:ss.SSS} [%level] %logger{36} [%thread] [%mdc{X-B3-TraceId:--}] %message%n%xException</pattern>
+        </encoder>
+    </appender>
+
+    <if condition='isDefined("ELK_URL")'>
+        <then>
+            <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+                <destination>${ELK_URL}</destination>
+                <keepAliveDuration>1 minute</keepAliveDuration>
+                <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                    <customFields>{"hostname":"${HOSTNAME}","appName":"OnboardingService","appId":"onwonboardingservice","group":"ospnow-wms","cfcId":"${CFC_ID}"}</customFields>
+                </encoder>
+            </appender>
+        </then>
+    </if>
+
+    <if condition='isDefined("PLATFORM_LOGSTASH_URL")'>
+        <then>
+            <appender name="PLATFORM_LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+                <destination>${PLATFORM_LOGSTASH_URL}</destination>
+                <keepAliveDuration>1 minute</keepAliveDuration>
+                <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                    <customFields>{"hostname":"${HOSTNAME}","appName":"OnboardingService","appId":"onwonboardingservice","group":"ospnow-wms","cfcId":"${CFC_ID}"}</customFields>
+                </encoder>
+            </appender>
+        </then>
+    </if>
+
+    <appender name="ASYNC_CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
+        <param name="queueSize" value="256"/>
+        <param name="neverBlock" value="true"/>
+        <appender-ref ref="CONSOLE"/>
+    </appender>
+
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <param name="queueSize" value="256"/>
+        <param name="neverBlock" value="true"/>
+        <appender-ref ref="FILE"/>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="ASYNC_CONSOLE"/>
+        <appender-ref ref="ASYNC_FILE"/>
+        <appender-ref ref="LOGSTASH"/>
+        <appender-ref ref="PLATFORM_LOGSTASH"/>
+    </root>
+
+    <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook"/>
+
+</configuration>

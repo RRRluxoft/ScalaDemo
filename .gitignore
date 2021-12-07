@@ -1,0 +1,9 @@
+**/target/
+.idea/
+.ensime
+.ensime_cache/
+.DS_Store
+.bloop/
+.metals/
+# to avoid including symlinks to the standard scalafmt config at https://gitlab.tech.lastmile.com/wmsnonfood/scalacommons/scalafmt-config
+.scalafmt.conf

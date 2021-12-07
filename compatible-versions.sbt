@@ -1,0 +1,1 @@
+wmsCompatibleVersions in ThisBuild := Set()

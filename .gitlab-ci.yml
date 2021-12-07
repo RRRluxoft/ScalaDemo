@@ -1,0 +1,20 @@
+include:
+  - project: '****ms/ci/gitlabci-template' # https://gitlab.tech.lastmile.com/gmwms/ci/gitlabci-template/blob/master/.gitlab-ci-template-scala.yml
+    ref: 'master'
+    file: '.gitlab-ci-template-scala.yml'
+
+variables:
+  APP_NAME: 'OnboardingService'
+  ARTIFACT: 'OnboardingService.jar'
+  ARTIFACT_PATH: 'target/out/${ARTIFACT}'
+  IMAGE_NAME: '${INTERNAL_DOCKER_HUB}/${APP_TAG}'
+
+
+jar-assembly-manual:
+  extends: .hide
+
+jar-assembly-cr:
+  extends: .hide
+
+jar-assembly-master:
+  extends: .hide
